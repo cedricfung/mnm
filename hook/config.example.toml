@@ -1,0 +1,7 @@
+[mixin]
+client-id="382f37da-b247-4623-8bc8-ce2a12db56bd"
+session-id="74aa09c3-f4be-45ed-80f7-fc37c88053d1"
+private-key="RZ3ttz32YwWcjYOq1HbCkyKPHxl0gZXoJ053BKM93tZ_P28u7cu6upoKGl92iHcPIyz2zNcFLv0HfGBPCf2vTw"
+
+[app]
+port=7000
