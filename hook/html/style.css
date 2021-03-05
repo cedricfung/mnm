@@ -71,8 +71,11 @@ a:visited {
 
 footer {
   opacity: 0.5;
-  font-size: 0.8em;
   margin: 64px 0;
+}
+
+footer p {
+  font-size: 0.8em;
 }
 
 pre.code {
