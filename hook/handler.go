@@ -2,29 +2,17 @@ package main
 
 import (
 	"context"
-	_ "embed"
-	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"strings"
-	"text/template"
 	"time"
 
 	"github.com/dgraph-io/badger/v3"
 	"github.com/fox-one/mixin-sdk-go"
 	"github.com/gofrs/uuid"
 )
-
-//go:embed mnm.sh
-var MNMSH []byte
-
-//go:embed html/index.html
-var TemplateIndex []byte
-
-//go:embed html/token.html
-var TemplateToken []byte
 
 type Handler struct {
 	db     *badger.DB
@@ -84,7 +72,6 @@ func (hdr *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (hdr *Handler) setCurrentUser(w http.ResponseWriter, r *http.Request) *http.Request {
-
 	ac, err := r.Cookie("Authorization")
 	if err == http.ErrNoCookie {
 		oauth := fmt.Sprintf("https://mixin.one/oauth/authorize?client_id=%s&scope=PROFILE:READ", hdr.mixin.ClientID)
@@ -123,17 +110,8 @@ func (hdr *Handler) handleRoot(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tpl, err := template.New("index").Parse(string(TemplateIndex))
-	if err != nil {
-		panic(err)
-	}
-
-	data := struct {
-		Me            *mixin.User
-		Conversations []*ConverstaionWithToken
-	}{me, convs}
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	tpl.Execute(w, data)
+	data := map[string]interface{}{"Me": me, "Conversations": convs}
+	hdr.renderHTML(w, r, TemplateIndex, data)
 }
 
 func (hdr *Handler) handleAuth(w http.ResponseWriter, r *http.Request) {
@@ -159,21 +137,17 @@ func (hdr *Handler) handleAuth(w http.ResponseWriter, r *http.Request) {
 
 func (hdr *Handler) handleScript(w http.ResponseWriter, r *http.Request) {
 	token, sh := getHookToken(r.URL.Path)
-	cid, pid, err := hdr.readConvPartByToken(r.Context(), token)
+	conv, pid, err := hdr.readConvPartByToken(r.Context(), token)
 	if err != nil {
 		log.Println(err)
 		http.Error(w, "read conversation error", http.StatusInternalServerError)
 		return
 	}
-	if cid == "" || pid == "" {
+	if conv == nil || pid == "" {
 		http.Error(w, "read conversation error", http.StatusForbidden)
 		return
 	}
 
-	tpl, err := template.New("token").Parse(string(TemplateToken))
-	if err != nil {
-		panic(err)
-	}
 	script := string(MNMSH)
 	script = strings.Replace(script, "MM-WEBHOOK-TOKEN", token, -1)
 	if sh {
@@ -183,23 +157,19 @@ func (hdr *Handler) handleScript(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data := struct {
-		Script string
-	}{script}
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	w.WriteHeader(http.StatusOK)
-	tpl.Execute(w, data)
+	data := map[string]interface{}{"Script": script, "Token": token, "Conversation": conv}
+	hdr.renderHTML(w, r, TemplateToken, data)
 }
 
 func (hdr *Handler) handleMessage(w http.ResponseWriter, r *http.Request) {
 	token, _ := getHookToken(r.URL.Path)
-	cid, pid, err := hdr.readConvPartByToken(r.Context(), token)
+	conv, pid, err := hdr.readConvPartByToken(r.Context(), token)
 	if err != nil {
 		log.Println(err)
 		http.Error(w, "read conversation error", http.StatusInternalServerError)
 		return
 	}
-	if cid == "" || pid == "" {
+	if conv == nil || pid == "" {
 		http.Error(w, "read conversation error", http.StatusForbidden)
 		return
 	}
@@ -211,7 +181,7 @@ func (hdr *Handler) handleMessage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	mid, _ := uuid.NewV4()
-	msg.ConversationID = cid
+	msg.ConversationID = conv.ConversationID
 	msg.MessageID = mid.String()
 	err = hdr.mixin.SendMessage(r.Context(), &msg)
 	if err != nil {
@@ -240,54 +210,4 @@ func getHookToken(path string) (string, bool) {
 		return "", false
 	}
 	return id.String(), len(parts) == 2 && parts[1] == "sh"
-}
-
-func (hdr *Handler) OnAckReceipt(ctx context.Context, msg *mixin.MessageView, userID string) error {
-	return nil
-}
-
-type systemConversationPayload struct {
-	Action        string `json:"action"`
-	ParticipantId string `json:"participant_id"`
-	UserId        string `json:"user_id,omitempty"`
-	Role          string `json:"role,omitempty"`
-}
-
-func (hdr *Handler) OnMessage(ctx context.Context, msg *mixin.MessageView, userID string) error {
-	if msg.Category != mixin.MessageCategorySystemConversation {
-		return nil
-	}
-
-	data, err := base64.URLEncoding.DecodeString(msg.Data)
-	if err != nil {
-		log.Println(msg, err)
-		return nil
-	}
-
-	var cp systemConversationPayload
-	err = json.Unmarshal(data, &cp)
-	if err != nil {
-		log.Println(msg, err)
-		return nil
-	}
-
-	switch cp.Action {
-	case "ADD":
-		if cp.ParticipantId == hdr.mixin.ClientID {
-			err = hdr.refreshConversation(ctx, msg.ConversationID)
-		} else {
-			err = hdr.addParticipant(ctx, msg.ConversationID, cp.ParticipantId)
-		}
-	case "REMOVE":
-		err = hdr.removeParticipant(ctx, msg.ConversationID, cp.ParticipantId)
-	case "UPDATE":
-		err = hdr.refreshConversation(ctx, msg.ConversationID)
-	default:
-		return nil
-	}
-
-	if err != nil {
-		log.Println(msg, cp, err)
-	}
-	return nil
 }

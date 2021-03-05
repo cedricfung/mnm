@@ -20,22 +20,34 @@ type ConverstaionWithToken struct {
 	Meta  *mixin.Conversation
 }
 
-func (hdr *Handler) readConvPartByToken(ctx context.Context, token string) (string, string, error) {
+func (hdr *Handler) readConvPartByToken(ctx context.Context, token string) (*mixin.Conversation, string, error) {
 	txn := hdr.db.NewTransaction(false)
 	defer txn.Discard()
 
 	item, err := txn.Get(keyToken(token))
 	if err == badger.ErrKeyNotFound {
-		return "", "", nil
+		return nil, "", nil
 	} else if err != nil {
-		return "", "", err
+		return nil, "", err
 	}
 	pc, err := item.ValueCopy(nil)
 	if err != nil {
-		return "", "", err
+		return nil, "", err
 	}
 	pc = pc[len(DbPrefixConversationParticipant):]
-	return string(pc[36:]), string(pc[:36]), nil
+	cid, pid := string(pc[36:]), string(pc[:36])
+
+	item, err = txn.Get(keyConvMeta(string(cid)))
+	if err != nil {
+		return nil, "", err
+	}
+	cb, err := item.ValueCopy(nil)
+	if err != nil {
+		return nil, "", err
+	}
+	var conv mixin.Conversation
+	err = json.Unmarshal(cb, &conv)
+	return &conv, pid, err
 }
 
 func (hdr *Handler) listConversations(ctx context.Context) ([]*ConverstaionWithToken, error) {
