@@ -26,13 +26,13 @@ echo
 curl -L "${RAW}" -o /tmp/mnm
 echo
 
-if [-f "${BIN}"]
+if [ -f "${BIN}" ]
 then
     echo "${BIN} INSTALLED"
     exit 0
 fi
 
-if [-f "${ETC}"]
+if [ -f "${ETC}" ]
 then
     echo "${ETC} CONFIGURED"
     exit 0

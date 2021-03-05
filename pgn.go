@@ -18,6 +18,7 @@ import (
 
 func main() {
 	tb, _ := os.ReadFile("/etc/default/mnm")
+	token := strings.TrimSpace(string(tb))
 	app := &cli.App{
 		Name:    "mnm",
 		Usage:   "monitor & notifier to messenger",
@@ -31,7 +32,7 @@ func main() {
 			},
 			&cli.StringFlag{
 				Name:  "token",
-				Value: fmt.Sprintf("%s (/etc/defautl/mnm)", string(tb)),
+				Value: fmt.Sprintf("%s (/etc/defautl/mnm)", token),
 				Usage: "the webhook token",
 			},
 			&cli.StringFlag{
