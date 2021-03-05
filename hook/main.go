@@ -49,10 +49,12 @@ func loop(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
+
 	db, err := openDB(dir + "/db")
 	if err != nil {
 		return err
 	}
+	defer db.Close()
 
 	ctx := context.Background()
 	client, err := mixin.NewFromKeystore(&mixin.Keystore{
