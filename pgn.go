@@ -23,24 +23,26 @@ func main() {
 		Name:    "mnm",
 		Usage:   "monitor & notifier to messenger",
 		Version: "0.0.1",
-		Action:  action,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "api",
 				Value: "https://mnm.sh",
-				Usage: "the webhook api",
+				Usage: "The webhook api",
 			},
 			&cli.StringFlag{
 				Name:  "token",
 				Value: fmt.Sprintf("%s", token),
-				Usage: "the webhook token (/etc/defautl/mnm)",
-			},
-			&cli.StringFlag{
-				Name:  "run",
-				Usage: "the full command line",
+				Usage: "The webhook token (/etc/defautl/mnm)",
 			},
 		},
 		EnableBashCompletion: true,
+		Commands: []*cli.Command{
+			{
+				Name:   "run",
+				Usage:  "Run a command",
+				Action: action,
+			},
+		},
 	}
 
 	err := app.Run(os.Args)
@@ -52,8 +54,8 @@ func main() {
 func action(c *cli.Context) error {
 	startAt := time.Now()
 	api := c.String("api")
-	prog := c.String("run")
 	token := c.String("token")
+	prog := c.Args().First()
 
 	parts := strings.Split(prog, " ")
 	name, args := parts[0], parts[1:]

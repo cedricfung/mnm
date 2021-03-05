@@ -7,5 +7,5 @@ monitor & notifier to messenger
 Open https://mnm.sh to finish intallation.
 
 ```bash
-mnm -run 'ls -l /tmp'
+mnm run 'ls -l /tmp'
 ```
