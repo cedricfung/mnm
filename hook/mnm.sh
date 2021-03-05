@@ -21,38 +21,44 @@ esac
 
 RAW="https://raw.githubusercontent.com/cedricfung/mnm/master/bin/pgn-${bin}"
 
-echo "curl -L ${RAW} -o /tmp/mnm"
+echo "🚀 curl -L ${RAW} -o /tmp/mnm"
 echo
 curl -L "${RAW}" -o /tmp/mnm
 echo
 
 if [ -f "${BIN}" ]
 then
-    echo "${BIN} INSTALLED"
+    echo "🌝 ${BIN} INSTALLED"
     exit 0
 fi
 
 if [ -f "${ETC}" ]
 then
-    echo "${ETC} CONFIGURED"
+    echo "🌝 ${ETC} CONFIGURED"
     exit 0
 fi
 
 if file /tmp/mnm | grep -q "executable"
 then
-    echo "chmod +x /tmp/mnm"
+    echo "🧭 chmod +x /tmp/mnm"
     chmod +x /tmp/mnm
-    echo
 
-    echo "sudo mv /tmp/mnm /usr/bin/"
+    echo "🧭 sudo mv /tmp/mnm /usr/bin/"
     sudo mv /tmp/mnm /usr/bin/
-    echo
 
-    echo "echo ${TOKEN} | sudo tee ${ETC}"
+    echo "🧭 echo ${TOKEN} | sudo tee ${ETC}"
     echo "${TOKEN}" | sudo tee "${ETC}"
-    echo
 else
-    echo "OOPS"
+    echo "🌚 OOPS"
 fi
 
-echo "OK"
+echo "🌞 OK"
+echo
+
+echo "🚨 run a test notification"
+echo "🚨 mnm run 'ls -l /tmp'"
+mnm run 'ls -l /tmp'
+echo
+
+echo "🌞 OK"
+echo
