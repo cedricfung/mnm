@@ -32,8 +32,8 @@ func main() {
 			},
 			&cli.StringFlag{
 				Name:  "token",
-				Value: fmt.Sprintf("%s (/etc/defautl/mnm)", token),
-				Usage: "the webhook token",
+				Value: fmt.Sprintf("%s", token),
+				Usage: "the webhook token (/etc/defautl/mnm)",
 			},
 			&cli.StringFlag{
 				Name:  "run",
