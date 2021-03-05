@@ -1,0 +1,10 @@
+{{ .Me.IdentityNumber }}
+{{ .Me.FullName }}
+
+<ul>
+  {{ range .Conversations }}
+  <li>
+    <a href="/in/{{ .Token }}">{{ .Meta.Name }}</a>
+  </li>
+  {{ end }}
+</ul>

@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	_ "embed"
 	"fmt"
 	"log"
 	"os"
@@ -11,9 +10,6 @@ import (
 	"github.com/mitchellh/go-homedir"
 	"github.com/urfave/cli/v2"
 )
-
-//go:embed mnm.sh
-var MNMSH []byte
 
 func main() {
 	home, err := homedir.Dir()
@@ -66,7 +62,7 @@ func loop(c *cli.Context) error {
 		return err
 	}
 
-	hdr := &Handler{db: db, mixin: client}
+	hdr := &Handler{db: db, mixin: client, secret: conf.Mixin.OauthSecret}
 	go client.LoopBlaze(ctx, hdr)
 	return NewServer(hdr, conf.App.Port).ListenAndServe()
 }

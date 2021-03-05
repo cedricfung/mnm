@@ -2,7 +2,7 @@
 
 # mnm is a process monitor & notifier
 # notifications delivered to Mixin Messenger
-# curl -sSL https://mnm.sh/me/MM-WEBHOOK-TOKEN | bash
+# curl -sSL https://mnm.sh/in/MM-WEBHOOK-TOKEN.sh | bash
 
 TOKEN=MM-WEBHOOK-TOKEN
 BIN=/usr/bin/mnm

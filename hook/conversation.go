@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 
 	"github.com/dgraph-io/badger/v3"
+	"github.com/fox-one/mixin-sdk-go"
 	"github.com/gofrs/uuid"
 )
 
@@ -13,6 +14,77 @@ const (
 	DbPrefixConversationParticipant = "CONV#PART#"
 	DbPrefixToken                   = "TOKEN#"
 )
+
+type ConverstaionWithToken struct {
+	Token string
+	Meta  *mixin.Conversation
+}
+
+func (hdr *Handler) readConvPartByToken(ctx context.Context, token string) (string, string, error) {
+	txn := hdr.db.NewTransaction(false)
+	defer txn.Discard()
+
+	item, err := txn.Get(keyToken(token))
+	if err == badger.ErrKeyNotFound {
+		return "", "", nil
+	} else if err != nil {
+		return "", "", err
+	}
+	pc, err := item.ValueCopy(nil)
+	if err != nil {
+		return "", "", err
+	}
+	pc = pc[len(DbPrefixConversationParticipant):]
+	return string(pc[36:]), string(pc[:36]), nil
+}
+
+func (hdr *Handler) listConversations(ctx context.Context) ([]*ConverstaionWithToken, error) {
+	txn := hdr.db.NewTransaction(false)
+	defer txn.Discard()
+
+	it := txn.NewIterator(badger.DefaultIteratorOptions)
+	defer it.Close()
+
+	me := hdr.getCurrentUser(ctx)
+	convs := make([]*ConverstaionWithToken, 0)
+	prefix := keyConvPart("", me.UserID)
+	for it.Seek(prefix); it.ValidForPrefix(prefix); it.Next() {
+		item := it.Item()
+		tk, err := item.ValueCopy(nil)
+		if err != nil {
+			return nil, err
+		}
+		token := string(tk[len(DbPrefixToken):])
+
+		cid := item.Key()[len(DbPrefixConversationParticipant)+len(me.UserID):]
+		_, err = txn.Get(keyConvPart(string(cid), hdr.mixin.ClientID))
+		if err == badger.ErrKeyNotFound {
+			continue
+		} else if err != nil {
+			return nil, err
+		}
+
+		item, err = txn.Get(keyConvMeta(string(cid)))
+		if err != nil {
+			return nil, err
+		}
+		cb, err := item.ValueCopy(nil)
+		if err != nil {
+			return nil, err
+		}
+		var conv mixin.Conversation
+		err = json.Unmarshal(cb, &conv)
+		if err != nil {
+			return nil, err
+		}
+
+		convs = append(convs, &ConverstaionWithToken{
+			Token: token,
+			Meta:  &conv,
+		})
+	}
+	return convs, nil
+}
 
 func (hdr *Handler) addParticipant(ctx context.Context, cid, pid string) error {
 	return hdr.db.Update(func(txn *badger.Txn) error {
@@ -80,7 +152,11 @@ func addConvPart(txn *badger.Txn, cid, pid string) error {
 
 	token := generateRandomToken()
 	tk := keyToken(token)
-	return txn.Set(cp, tk)
+	err = txn.Set(cp, tk)
+	if err != nil {
+		return err
+	}
+	return txn.Set(tk, cp)
 }
 
 func keyToken(token string) []byte {

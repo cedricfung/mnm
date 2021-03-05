@@ -8,9 +8,10 @@ import (
 
 type Config struct {
 	Mixin struct {
-		ClientID   string `toml:"client-id"`
-		SessionID  string `toml:"session-id"`
-		PrivateKey string `toml:"private-key"`
+		ClientID    string `toml:"client-id"`
+		SessionID   string `toml:"session-id"`
+		PrivateKey  string `toml:"private-key"`
+		OauthSecret string `toml:"oauth-secret"`
 	} `toml:"mixin"`
 	App struct {
 		Port int `toml:"port"`

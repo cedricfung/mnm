@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -25,7 +26,7 @@ func main() {
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "api",
-				Value: "https://webhook.exinwork.com/api/send",
+				Value: "https://mnm.sh",
 				Usage: "the webhook api",
 			},
 			&cli.StringFlag{
@@ -95,11 +96,12 @@ func action(c *cli.Context) error {
 }
 
 func notify(api, token, run, result string, startAt time.Time) error {
-	endpoint := api + "?access_token=" + token
+	endpoint := api + "/in/" + token
 	runtime := time.Now().Sub(startAt).String()
+	info := fmt.Sprintf("RUN: %s\r\nRESULT: %s\r\nRUNTIME: %s", run, result, runtime)
 	body, _ := json.Marshal(map[string]string{
 		"category": "PLAIN_TEXT",
-		"data":     fmt.Sprintf("RUN: %s\r\nRESULT: %s\r\nRUNTIME: %s", run, result, runtime),
+		"data":     base64.URLEncoding.EncodeToString([]byte(info)),
 	})
 	req, err := http.NewRequest("POST", endpoint, bytes.NewReader(body))
 	if err != nil {
