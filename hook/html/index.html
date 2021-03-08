@@ -38,7 +38,7 @@
   <body>
     <h1>👋 Hi, {{ .Me.FullName }}</h1>
     <p><strong>Ⓜ️NⓂ️</strong> is a process monitor which will automatically send notifications to the configured groups in Mixin Messenger.</p>
-    <p>Add <strong>7000103800</strong> as a contact, then add it to the groups you wish to receive notifcations. Afterwards, refresh this page.</p>
+    <p>Add <strong>7000103800</strong> as a contact, then add it to the groups you wish to receive notifications. Afterwards, refresh this page.</p>
 
     <h2>👩‍💻 Your Groups</h2>
     <p>If your groups doesn't appear here, please send <strong>mnm</strong> a message in the missing group by <strong>@7000103800</strong>.</p>
@@ -58,7 +58,7 @@
     <p>Download a large file? Let mnm monitor that and notify you when it's done.</p>
     <pre class="code">mnm run 'wget https://some.large/file.zip'</pre>
 
-    <p>Even if you already have a passive external monitor for your services, you may use mnm as a proactive monitor for your service.</p>
+    <p>Even if you already have a passive external monitor for your services, you may use mnm as a proactive monitor.</p>
     <pre class="small code">
 [Unit]
 Description=Mixin Network Kernel Daemon
@@ -68,7 +68,7 @@ After=network.target
 User=one
 Type=simple
 ExecStart=/usr/bin/mnm run '/usr/bin/mixin kernel -dir /data/mixin -port 7239'
-Restart=on-failure
+Restart=always
 LimitNOFILE=65536
 
 [Install]
