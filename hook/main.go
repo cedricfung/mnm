@@ -66,8 +66,9 @@ func loop(c *cli.Context) error {
 	hdr := &Handler{db: db, mixin: client, secret: conf.Mixin.OauthSecret}
 	go func() {
 		for {
-			client.LoopBlaze(ctx, hdr)
-			time.Sleep(time.Second)
+			err := client.LoopBlaze(ctx, hdr)
+			log.Println("LoopBlaze done with", err)
+			time.Sleep(3 * time.Second)
 		}
 	}()
 	return NewServer(hdr, conf.App.Port).ListenAndServe()
