@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	"github.com/fox-one/mixin-sdk-go"
 	"github.com/mitchellh/go-homedir"
@@ -63,6 +64,11 @@ func loop(c *cli.Context) error {
 	}
 
 	hdr := &Handler{db: db, mixin: client, secret: conf.Mixin.OauthSecret}
-	go client.LoopBlaze(ctx, hdr)
+	go func() {
+		for {
+			client.LoopBlaze(ctx, hdr)
+			time.Sleep(time.Second)
+		}
+	}()
 	return NewServer(hdr, conf.App.Port).ListenAndServe()
 }
