@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"runtime"
 	"strings"
 	"sync"
 	"time"
@@ -17,7 +18,11 @@ import (
 )
 
 func main() {
-	tb, _ := os.ReadFile("/etc/default/mnm")
+	tbPath := "/etc/default/mnm"
+	if runtime.GOOS == "darwin" {
+		tbPath = "/etc/defaults/mnm"
+	}
+	tb, _ := os.ReadFile(tbPath)
 	token := strings.TrimSpace(string(tb))
 	app := &cli.App{
 		Name:    "mnm",
@@ -32,7 +37,7 @@ func main() {
 			&cli.StringFlag{
 				Name:  "token",
 				Value: fmt.Sprintf("%s", token),
-				Usage: "The webhook token (/etc/defautl/mnm)",
+				Usage: fmt.Sprintf("The webhook token (%s)", tbPath),
 			},
 		},
 		EnableBashCompletion: true,

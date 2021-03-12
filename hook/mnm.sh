@@ -15,7 +15,7 @@ esac
 
 case "$(uname -s)" in
     Linux*)     bin="linux-${arch}";;
-    Darwin*)    bin="macos-${arch}";;
+    Darwin*)    bin="macos-${arch}" BIN=/usr/local/bin/mnm ETC=/etc/defaults/mnm;;
     *)          bin="linux-${arch}";;
 esac
 
@@ -43,8 +43,8 @@ then
     echo "🧭 chmod +x /tmp/mnm"
     chmod +x /tmp/mnm
 
-    echo "🧭 sudo mv /tmp/mnm /usr/bin/"
-    sudo mv /tmp/mnm /usr/bin/
+    echo "🧭 sudo mv /tmp/mnm ${BIN}"
+    sudo mv /tmp/mnm "${BIN}"
 
     echo "🧭 echo ${TOKEN} | sudo tee ${ETC}"
     echo "${TOKEN}" | sudo tee "${ETC}"
