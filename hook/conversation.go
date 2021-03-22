@@ -131,6 +131,9 @@ func (hdr *Handler) refreshConversation(ctx context.Context, id string) error {
 	if err != nil {
 		return err
 	}
+	if conv.Category == "CONTACT" {
+		conv.Name = "Me, Myself and I"
+	}
 
 	return hdr.db.Update(func(txn *badger.Txn) error {
 		key := keyConvMeta(id)
