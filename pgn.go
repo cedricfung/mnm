@@ -84,6 +84,11 @@ func action(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
+	info := fmt.Sprintf("RUN: %s\r\nPID: %d\r\nSTART: %s", prog, cmd.Process.Pid, startAt)
+	err = notify(api, token, info)
+	if err != nil {
+		return err
+	}
 
 	var wg sync.WaitGroup
 	for _, p := range []io.ReadCloser{stdout, stderr} {
@@ -100,13 +105,13 @@ func action(c *cli.Context) error {
 		result = err.Error()
 	}
 
-	return notify(api, token, prog, result, startAt)
+	runtime := time.Now().Sub(startAt).String()
+	info = fmt.Sprintf("RUN: %s\r\nRESULT: %s\r\nRUNTIME: %s", prog, result, runtime)
+	return notify(api, token, info)
 }
 
-func notify(api, token, run, result string, startAt time.Time) error {
+func notify(api, token, info string) error {
 	endpoint := api + "/in/" + token
-	runtime := time.Now().Sub(startAt).String()
-	info := fmt.Sprintf("RUN: %s\r\nRESULT: %s\r\nRUNTIME: %s", run, result, runtime)
 	body, _ := json.Marshal(map[string]string{
 		"category": "PLAIN_TEXT",
 		"data":     base64.URLEncoding.EncodeToString([]byte(info)),
