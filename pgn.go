@@ -84,7 +84,7 @@ func action(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	info := fmt.Sprintf("RUN: %s\r\nPID: %d\r\nSTART: %s", prog, cmd.Process.Pid, startAt)
+	info := fmt.Sprintf("🚀 RUN: %s\r\n🌞 PID: %d\r\n🧭 START: %s", prog, cmd.Process.Pid, startAt)
 	err = notify(api, token, info)
 	if err != nil {
 		return err
@@ -106,7 +106,10 @@ func action(c *cli.Context) error {
 	}
 
 	runtime := time.Now().Sub(startAt).String()
-	info = fmt.Sprintf("RUN: %s\r\nRESULT: %s\r\nRUNTIME: %s", prog, result, runtime)
+	info = fmt.Sprintf("🚀 RUN: %s\r\n🌞 RESULT: %s\r\n🧭 RUNTIME: %s", prog, result, runtime)
+	if result != "OK" {
+		info = fmt.Sprintf("🚀 RUN: %s\r\n🚨 RESULT: %s\r\n🧭 RUNTIME: %s", prog, result, runtime)
+	}
 	return notify(api, token, info)
 }
 
