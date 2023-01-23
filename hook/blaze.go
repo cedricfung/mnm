@@ -26,7 +26,7 @@ func (hdr *Handler) OnMessage(ctx context.Context, msg *mixin.MessageView, userI
 		return nil
 	}
 
-	data, err := base64.URLEncoding.DecodeString(msg.Data)
+	data, err := base64.RawURLEncoding.DecodeString(msg.Data)
 	if err != nil {
 		log.Println(msg, err)
 		return nil

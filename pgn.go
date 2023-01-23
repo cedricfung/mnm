@@ -117,7 +117,7 @@ func notify(api, token, info string) error {
 	endpoint := api + "/in/" + token
 	body, _ := json.Marshal(map[string]string{
 		"category": "PLAIN_TEXT",
-		"data":     base64.URLEncoding.EncodeToString([]byte(info)),
+		"data":     base64.RawURLEncoding.EncodeToString([]byte(info)),
 	})
 	req, err := http.NewRequest("POST", endpoint, bytes.NewReader(body))
 	if err != nil {
