@@ -106,9 +106,11 @@ func action(c *cli.Context) error {
 	}
 
 	runtime := time.Now().Sub(startAt).String()
-	info = fmt.Sprintf("🚀 RUN: %s\r\n🌞 RESULT: %s\r\n🧭 RUNTIME: %s", prog, result, runtime)
+	info = fmt.Sprintf("🟢🟢🟢🟢🟢🟢🟢\r\n🚀 RUN: %s\r\n🌞 RESULT: %s\r\n🧭 RUNTIME: %s",
+		prog, result, runtime)
 	if result != "OK" {
-		info = fmt.Sprintf("🚀 RUN: %s\r\n🚨 RESULT: %s\r\n🧭 RUNTIME: %s", prog, result, runtime)
+		info = fmt.Sprintf("🔴🔴🔴🔴🔴🔴🔴\r\n🚀 RUN: %s\r\n🚨 RESULT: %s\r\n🧭 RUNTIME: %s",
+			prog, result, runtime)
 	}
 	return notify(api, token, info)
 }

@@ -4,7 +4,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/dgraph-io/badger/v3"
+	"github.com/dgraph-io/badger/v4"
 )
 
 func openDB(dir string) (*badger.DB, error) {
