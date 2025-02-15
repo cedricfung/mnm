@@ -9,25 +9,25 @@
 
 ## 🎡 Typical Usages
 
-Already has a long running task? Get notified when it's done.
+Have a long running task already? Get notified when it's done:
 
 ```bash
 mnm monitor PID
 ```
 
-Make a large tarball? Let mnm monitor that and notify you when it's done.
+Make a large tarball? Let mnm monitor that and notify you when it's done:
 
 ```
 mnm run 'tar jcvf snapshots.tar.bz2 snapshots'
 ```
 
-Download a large file? Let mnm monitor that and notify you when it's done.
+Download a large file? Let mnm monitor that and notify you when it's done:
 
 ```
 mnm run 'wget https://some.large/file.zip'
 ```
 
-Even if you already have a passive external monitor for your services, you may use mnm as a proactive monitor for your service.
+Even if you already have a passive external monitor for your services, you may use mnm as a proactive monitor for your service:
 
 ```
 [Unit]
