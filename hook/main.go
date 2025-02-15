@@ -57,7 +57,7 @@ func loop(c *cli.Context) error {
 	client, err := mixin.NewFromKeystore(&mixin.Keystore{
 		ClientID:   conf.Mixin.ClientID,
 		SessionID:  conf.Mixin.SessionID,
-		PrivateKey: conf.Mixin.PrivateKey,
+		PrivateKey: conf.Mixin.SessionPrivateKey,
 	})
 	if err != nil {
 		return err

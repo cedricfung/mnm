@@ -1,7 +1,7 @@
 [mixin]
 client-id="382f37da-b247-4623-8bc8-ce2a12db56bd"
 session-id="74aa09c3-f4be-45ed-80f7-fc37c88053d1"
-private-key="RZ3ttz32YwWcjYOq1HbCkyKPHxl0gZXoJ053BKM93tZ_P28u7cu6upoKGl92iHcPIyz2zNcFLv0HfGBPCf2vTw"
+session-private-key="a9cf33f4542f030839f4120be6f0b4c5af2291f53bb9d08325c7742961ba9745"
 oauth-secret="a9cf33f4542f030839f4120be6f0b4c5af2291f53bb9d08325c7742961ba9745"
 
 [app]
