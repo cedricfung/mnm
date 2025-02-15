@@ -30,7 +30,7 @@ func main() {
 	app := &cli.App{
 		Name:    "mnm",
 		Usage:   "monitor & notifier to messenger",
-		Version: "0.0.1",
+		Version: "0.1.0",
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "api",
@@ -73,7 +73,7 @@ func monitor(c *cli.Context) error {
 		return fmt.Errorf("invalid PID %s", c.Args().First())
 	}
 
-	info := fmt.Sprintf("🚀 MONITOR: %d\r\n🧭 START: %s", pid, startAt)
+	info := fmt.Sprintf("🟢 MONITOR: %d\r\n🧭 START: %s", pid, startAt)
 	err = notify(api, token, info)
 	if err != nil {
 		return err
@@ -82,6 +82,7 @@ func monitor(c *cli.Context) error {
 	var result error
 	for {
 		running, err := process.PidExistsWithContext(context.Background(), int32(pid))
+		fmt.Printf("PID: %d RUNNING: %t ERROR: %v\n", pid, running, err)
 		if err != nil || !running {
 			result = err
 			break
