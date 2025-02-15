@@ -30,7 +30,7 @@ func main() {
 	app := &cli.App{
 		Name:    "mnm",
 		Usage:   "monitor & notifier to messenger",
-		Version: "0.1.0",
+		Version: "0.1.1",
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "api",

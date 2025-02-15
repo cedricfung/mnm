@@ -22,7 +22,7 @@ func main() {
 	app := &cli.App{
 		Name:    "hook",
 		Usage:   "messenger hook daemon",
-		Version: "0.0.1",
+		Version: "0.1.1",
 		Action:  loop,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
