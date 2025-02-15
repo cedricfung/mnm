@@ -8,7 +8,7 @@ import (
 
 type Config struct {
 	Mixin struct {
-		AppID             string `toml:"client-id"`
+		AppID             string `toml:"app-id"`
 		SessionID         string `toml:"session-id"`
 		SessionPrivateKey string `toml:"session-private-key"`
 		OauthSecret       string `toml:"oauth-secret"`
