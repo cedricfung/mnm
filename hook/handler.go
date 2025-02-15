@@ -10,8 +10,8 @@ import (
 	"time"
 
 	"github.com/dgraph-io/badger/v4"
-	"github.com/fox-one/mixin-sdk-go"
-	"github.com/gofrs/uuid"
+	"github.com/fox-one/mixin-sdk-go/v2"
+	"github.com/gofrs/uuid/v5"
 )
 
 type Handler struct {
@@ -180,7 +180,7 @@ func (hdr *Handler) handleMessage(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "parse message error", http.StatusBadRequest)
 		return
 	}
-	mid, _ := uuid.NewV4()
+	mid := uuid.Must(uuid.NewV4())
 	msg.ConversationID = conv.ConversationID
 	msg.MessageID = mid.String()
 	err = hdr.mixin.SendMessage(r.Context(), &msg)

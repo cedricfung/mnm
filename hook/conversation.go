@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 
 	"github.com/dgraph-io/badger/v4"
-	"github.com/fox-one/mixin-sdk-go"
-	"github.com/gofrs/uuid"
+	"github.com/fox-one/mixin-sdk-go/v2"
+	"github.com/gofrs/uuid/v5"
 )
 
 const (
@@ -188,9 +188,6 @@ func keyConvMeta(cid string) []byte {
 }
 
 func generateRandomToken() string {
-	id, err := uuid.NewV4()
-	if err != nil {
-		panic(err)
-	}
+	id := uuid.Must(uuid.NewV4())
 	return id.String()
 }

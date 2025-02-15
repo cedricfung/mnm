@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"log"
 
-	"github.com/fox-one/mixin-sdk-go"
+	"github.com/fox-one/mixin-sdk-go/v2"
 )
 
 func (hdr *Handler) OnAckReceipt(ctx context.Context, msg *mixin.MessageView, userID string) error {

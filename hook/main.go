@@ -7,7 +7,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/fox-one/mixin-sdk-go"
+	"github.com/fox-one/mixin-sdk-go/v2"
 	"github.com/mitchellh/go-homedir"
 	"github.com/urfave/cli/v2"
 )
@@ -55,9 +55,9 @@ func loop(c *cli.Context) error {
 
 	ctx := context.Background()
 	client, err := mixin.NewFromKeystore(&mixin.Keystore{
-		ClientID:   conf.Mixin.ClientID,
-		SessionID:  conf.Mixin.SessionID,
-		PrivateKey: conf.Mixin.SessionPrivateKey,
+		AppID:             conf.Mixin.AppID,
+		SessionID:         conf.Mixin.SessionID,
+		SessionPrivateKey: conf.Mixin.SessionPrivateKey,
 	})
 	if err != nil {
 		return err

@@ -6,8 +6,8 @@ replace github.com/dgraph-io/badger/v4 => github.com/MixinNetwork/badger/v4 v4.5
 
 require (
 	github.com/dgraph-io/badger/v4 v4.5.1
-	github.com/fox-one/mixin-sdk-go v1.9.1
-	github.com/gofrs/uuid v4.4.0+incompatible
+	github.com/fox-one/mixin-sdk-go/v2 v2.0.10
+	github.com/gofrs/uuid/v5 v5.3.1
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/pelletier/go-toml v1.9.5
 	github.com/shirou/gopsutil/v4 v4.25.1
@@ -25,6 +25,7 @@ require (
 	github.com/fox-one/msgpack v1.0.0 // indirect
 	github.com/go-ole/go-ole v1.3.0 // indirect
 	github.com/go-resty/resty/v2 v2.16.5 // indirect
+	github.com/gofrs/uuid v4.4.0+incompatible // indirect
 	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/google/flatbuffers v25.2.10+incompatible // indirect
