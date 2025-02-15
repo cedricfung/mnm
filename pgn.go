@@ -46,14 +46,16 @@ func main() {
 		EnableBashCompletion: true,
 		Commands: []*cli.Command{
 			{
-				Name:   "run",
-				Usage:  "Run a command",
-				Action: action,
+				Name:    "run",
+				Aliases: []string{"r"},
+				Usage:   "Run a command, e.g. mnm r 'wget https://some.large/file.zip'",
+				Action:  action,
 			},
 			{
-				Name:   "monitor",
-				Usage:  "Monitor a PID",
-				Action: monitor,
+				Name:    "monitor",
+				Aliases: []string{"m"},
+				Usage:   "Monitor a PID, e.g. mnm m 1314",
+				Action:  monitor,
 			},
 		},
 	}
