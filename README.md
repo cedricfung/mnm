@@ -2,9 +2,18 @@
 
 Ⓜ️NⓂ️  is a process monitor which will automatically send notifications to the configured groups in Mixin Messenger.
 
-Add 7000103800 as a contact, then add it to the groups you wish to receive notifications. Afterwards, refresh this page.
+1. Get Mixin Messenger from https://messenger.mixin.one.
+2. Search `mnm` and add it as a contact.
+3. Add `mnm` to the groups you wish to receive notifications.
+4. Open https://mnm.sh from your desktop browser.
 
 ## 🎡 Typical Usages
+
+Already has a long running task? Get notified when it's done.
+
+```bash
+mnm monitor PID
+```
 
 Make a large tarball? Let mnm monitor that and notify you when it's done.
 
@@ -36,4 +45,4 @@ LimitNOFILE=65536
 WantedBy=multi-user.target
 ```
 
-Endless possibilities, and yet convenient to go
+Endless possibilities, and yet convenient to go.
