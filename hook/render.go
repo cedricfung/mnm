@@ -28,7 +28,7 @@ var Stylesheet []byte
 //go:embed html/icons/android-chrome-192x192.png
 var Icon []byte
 
-func (hdr *Handler) renderHTML(w http.ResponseWriter, r *http.Request, tb []byte, data map[string]interface{}) {
+func (hdr *Handler) renderHTML(w http.ResponseWriter, tb []byte, data map[string]interface{}) {
 	tpl, err := template.New("index").Parse(string(tb))
 	if err != nil {
 		panic(err)
@@ -41,5 +41,8 @@ func (hdr *Handler) renderHTML(w http.ResponseWriter, r *http.Request, tb []byte
 	data["Stylesheet"] = string(Stylesheet)
 	data["Icon"] = base64.StdEncoding.EncodeToString(Icon)
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	tpl.Execute(w, data)
+	err = tpl.Execute(w, data)
+	if err != nil {
+		panic(err)
+	}
 }

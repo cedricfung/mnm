@@ -14,6 +14,8 @@ import (
 	"github.com/gofrs/uuid/v5"
 )
 
+type contextKey string
+
 type Handler struct {
 	db     *badger.DB
 	mixin  *mixin.Client
@@ -31,7 +33,7 @@ func NewServer(hdr *Handler, port int) *http.Server {
 	return server
 }
 
-func handlePanic(w http.ResponseWriter, r *http.Request) {
+func handlePanic(_ http.ResponseWriter, _ *http.Request) {
 	rcv := recover()
 	if rcv == nil {
 		return
@@ -94,11 +96,12 @@ func (hdr *Handler) setCurrentUser(w http.ResponseWriter, r *http.Request) *http
 		http.Error(w, "authorization mixin error", http.StatusInternalServerError)
 		return nil
 	}
-	return r.WithContext(context.WithValue(r.Context(), "ME", me))
+	ctx := context.WithValue(r.Context(), contextKey("ME"), me)
+	return r.WithContext(ctx)
 }
 
 func (hdr *Handler) getCurrentUser(ctx context.Context) *mixin.User {
-	return ctx.Value("ME").(*mixin.User)
+	return ctx.Value(contextKey("ME")).(*mixin.User)
 }
 
 func (hdr *Handler) handleRoot(w http.ResponseWriter, r *http.Request) {
@@ -111,7 +114,7 @@ func (hdr *Handler) handleRoot(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data := map[string]interface{}{"Me": me, "Conversations": convs}
-	hdr.renderHTML(w, r, TemplateIndex, data)
+	hdr.renderHTML(w, TemplateIndex, data)
 }
 
 func (hdr *Handler) handleAuth(w http.ResponseWriter, r *http.Request) {
@@ -153,12 +156,15 @@ func (hdr *Handler) handleScript(w http.ResponseWriter, r *http.Request) {
 	if sh {
 		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(script))
+		_, err = w.Write([]byte(script))
+		if err != nil {
+			panic(err)
+		}
 		return
 	}
 
 	data := map[string]interface{}{"Script": script, "Token": token, "Conversation": conv}
-	hdr.renderHTML(w, r, TemplateToken, data)
+	hdr.renderHTML(w, TemplateToken, data)
 }
 
 func (hdr *Handler) handleMessage(w http.ResponseWriter, r *http.Request) {
