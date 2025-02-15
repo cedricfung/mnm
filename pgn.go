@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -10,10 +11,12 @@ import (
 	"os"
 	"os/exec"
 	"runtime"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
 
+	"github.com/shirou/gopsutil/v4/process"
 	"github.com/urfave/cli/v2"
 )
 
@@ -36,7 +39,7 @@ func main() {
 			},
 			&cli.StringFlag{
 				Name:  "token",
-				Value: fmt.Sprintf("%s", token),
+				Value: token,
 				Usage: fmt.Sprintf("The webhook token (%s)", tbPath),
 			},
 		},
@@ -47,6 +50,11 @@ func main() {
 				Usage:  "Run a command",
 				Action: action,
 			},
+			{
+				Name:   "monitor",
+				Usage:  "Monitor a PID",
+				Action: monitor,
+			},
 		},
 	}
 
@@ -54,6 +62,41 @@ func main() {
 	if err != nil {
 		fmt.Println(err)
 	}
+}
+
+func monitor(c *cli.Context) error {
+	startAt := time.Now()
+	api := c.String("api")
+	token := c.String("token")
+	pid, err := strconv.Atoi(c.Args().First())
+	if err != nil || pid <= 0 {
+		return fmt.Errorf("invalid PID %s", c.Args().First())
+	}
+
+	info := fmt.Sprintf("🚀 MONITOR: %d\r\n🧭 START: %s", pid, startAt)
+	err = notify(api, token, info)
+	if err != nil {
+		return err
+	}
+
+	var result error
+	for {
+		running, err := process.PidExistsWithContext(context.Background(), int32(pid))
+		if err != nil || !running {
+			result = err
+			break
+		}
+		time.Sleep(time.Second * 5)
+	}
+
+	runtime := time.Since(startAt).String()
+	info = fmt.Sprintf("🟢🟢🟢🟢🟢🟢🟢\r\n🚀 MONITOR: %d\r\n🌞 RESULT: %v\r\n🧭 RUNTIME: %s",
+		pid, result, runtime)
+	if result != nil {
+		info = fmt.Sprintf("🔴🔴🔴🔴🔴🔴🔴\r\n🚀 RUN: %d\r\n🚨 RESULT: %v\r\n🧭 RUNTIME: %s",
+			pid, result, runtime)
+	}
+	return notify(api, token, info)
 }
 
 func action(c *cli.Context) error {
@@ -95,7 +138,10 @@ func action(c *cli.Context) error {
 		wg.Add(1)
 		go func(pipe io.ReadCloser) {
 			defer wg.Done()
-			io.Copy(os.Stdout, pipe)
+			_, err := io.Copy(os.Stdout, pipe)
+			if err != nil {
+				panic(err)
+			}
 		}(p)
 	}
 	wg.Wait()
@@ -105,7 +151,7 @@ func action(c *cli.Context) error {
 		result = err.Error()
 	}
 
-	runtime := time.Now().Sub(startAt).String()
+	runtime := time.Since(startAt).String()
 	info = fmt.Sprintf("🟢🟢🟢🟢🟢🟢🟢\r\n🚀 RUN: %s\r\n🌞 RESULT: %s\r\n🧭 RUNTIME: %s",
 		prog, result, runtime)
 	if result != "OK" {
