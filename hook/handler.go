@@ -2,12 +2,15 @@ package main
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"strings"
 	"time"
+	"unicode/utf8"
 
 	"github.com/dgraph-io/badger/v4"
 	"github.com/fox-one/mixin-sdk-go/v2"
@@ -179,17 +182,20 @@ func (hdr *Handler) handleMessage(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "read conversation error", http.StatusForbidden)
 		return
 	}
-	var msg mixin.MessageRequest
-	err = json.NewDecoder(r.Body).Decode(&msg)
+	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		log.Println(err)
+		http.Error(w, "read conversation error", http.StatusInternalServerError)
+		return
+	}
+	msg := makePostMessage(body)
+	if msg == nil {
 		http.Error(w, "parse message error", http.StatusBadRequest)
 		return
 	}
-	mid := uuid.Must(uuid.NewV4())
 	msg.ConversationID = conv.ConversationID
-	msg.MessageID = mid.String()
-	err = hdr.mixin.SendMessage(r.Context(), &msg)
+	msg.MessageID = uuid.Must(uuid.NewV4()).String()
+	err = hdr.mixin.SendMessage(r.Context(), msg)
 	if err != nil {
 		log.Println(err)
 		http.Error(w, "send message error", http.StatusInternalServerError)
@@ -197,6 +203,26 @@ func (hdr *Handler) handleMessage(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(http.StatusCreated)
+}
+
+func makePostMessage(body []byte) *mixin.MessageRequest {
+	var msg mixin.MessageRequest
+	err := json.Unmarshal(body, &msg)
+	if err == nil {
+		return &msg
+	}
+	if len(body) > 1024*32 {
+		return nil
+	}
+	if !utf8.ValidString(string(body)) {
+		return nil
+	}
+	post := fmt.Sprintf("```json\n%s```", string(body))
+	data := base64.RawURLEncoding.EncodeToString([]byte(post))
+	return &mixin.MessageRequest{
+		Category:   "PLAIN_POST",
+		DataBase64: data,
+	}
 }
 
 func getHookToken(path string) (string, bool) {
