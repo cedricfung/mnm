@@ -208,7 +208,7 @@ func (hdr *Handler) handleMessage(w http.ResponseWriter, r *http.Request) {
 func makePostMessage(body []byte) *mixin.MessageRequest {
 	var msg mixin.MessageRequest
 	err := json.Unmarshal(body, &msg)
-	if err == nil {
+	if err == nil && strings.HasPrefix(msg.Category, "PLAIN_") {
 		return &msg
 	}
 	if len(body) > 1024*32 {
@@ -217,10 +217,10 @@ func makePostMessage(body []byte) *mixin.MessageRequest {
 	if !utf8.ValidString(string(body)) {
 		return nil
 	}
-	post := fmt.Sprintf("```json\n%s```", string(body))
+	post := fmt.Sprintf("```json\n%s\n```", string(body))
 	data := base64.RawURLEncoding.EncodeToString([]byte(post))
 	return &mixin.MessageRequest{
-		Category:   "PLAIN_POST",
+		Category:   mixin.MessageCategoryPlainPost,
 		DataBase64: data,
 	}
 }
