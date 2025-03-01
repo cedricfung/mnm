@@ -8,6 +8,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"net/url"
 	"strings"
 	"time"
 	"unicode/utf8"
@@ -54,6 +55,16 @@ func (hdr *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if r.URL.Path == "/redirect" {
+		link, err := url.Parse(r.URL.Query().Get("link"))
+		if err != nil {
+			http.NotFound(w, r)
+		} else {
+			http.Redirect(w, r, link.String(), http.StatusFound)
+		}
+		return
+	}
+
 	if strings.HasPrefix(r.URL.Path, "/in/") {
 		if r.Method == "POST" {
 			hdr.handleMessage(w, r)
@@ -80,7 +91,7 @@ func (hdr *Handler) setCurrentUser(w http.ResponseWriter, r *http.Request) *http
 	ac, err := r.Cookie("Authorization")
 	if err == http.ErrNoCookie {
 		oauth := fmt.Sprintf("https://mixin.one/oauth/authorize?client_id=%s&scope=PROFILE:READ", hdr.mixin.ClientID)
-		http.Redirect(w, r, oauth, http.StatusTemporaryRedirect)
+		http.Redirect(w, r, oauth, http.StatusFound)
 		return nil
 	}
 	if err != nil {
@@ -91,7 +102,7 @@ func (hdr *Handler) setCurrentUser(w http.ResponseWriter, r *http.Request) *http
 	me, err := mixin.UserMe(r.Context(), ac.Value)
 	if mixin.IsErrorCodes(err, mixin.Unauthorized) {
 		oauth := fmt.Sprintf("https://mixin.one/oauth/authorize?client_id=%s&scope=PROFILE:READ", hdr.mixin.ClientID)
-		http.Redirect(w, r, oauth, http.StatusTemporaryRedirect)
+		http.Redirect(w, r, oauth, http.StatusFound)
 		return nil
 	}
 	if err != nil {
@@ -138,7 +149,7 @@ func (hdr *Handler) handleAuth(w http.ResponseWriter, r *http.Request) {
 		SameSite: http.SameSiteLaxMode,
 	}
 	http.SetCookie(w, &ac)
-	http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+	http.Redirect(w, r, "/", http.StatusFound)
 }
 
 func (hdr *Handler) handleScript(w http.ResponseWriter, r *http.Request) {
@@ -188,7 +199,7 @@ func (hdr *Handler) handleMessage(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "read conversation error", http.StatusInternalServerError)
 		return
 	}
-	msg := makePostMessage(body)
+	msg := hdr.makePostMessage(r, body)
 	if msg == nil {
 		http.Error(w, "parse message error", http.StatusBadRequest)
 		return
@@ -205,7 +216,7 @@ func (hdr *Handler) handleMessage(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 }
 
-func makePostMessage(body []byte) *mixin.MessageRequest {
+func (hdr *Handler) makePostMessage(r *http.Request, body []byte) *mixin.MessageRequest {
 	var msg mixin.MessageRequest
 	err := json.Unmarshal(body, &msg)
 	if err == nil && strings.HasPrefix(msg.Category, "PLAIN_") {
@@ -214,12 +225,21 @@ func makePostMessage(body []byte) *mixin.MessageRequest {
 	if !utf8.ValidString(string(body)) {
 		return nil
 	}
-	var bj any
-	err = json.Unmarshal(body, &bj)
+	var payload any
+	err = json.Unmarshal(body, &payload)
 	if err != nil {
 		return nil
 	}
-	body, err = json.MarshalIndent(bj, "", "  ")
+
+	card := hdr.makeAppCard(payload, r)
+	if card != "" {
+		return &mixin.MessageRequest{
+			Category:   mixin.MessageCategoryAppCard,
+			DataBase64: card,
+		}
+	}
+
+	body, err = json.MarshalIndent(payload, "", "  ")
 	if err != nil || len(body) > 1024*32 {
 		return nil
 	}
