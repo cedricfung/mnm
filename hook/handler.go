@@ -211,10 +211,16 @@ func makePostMessage(body []byte) *mixin.MessageRequest {
 	if err == nil && strings.HasPrefix(msg.Category, "PLAIN_") {
 		return &msg
 	}
-	if len(body) > 1024*32 {
+	if !utf8.ValidString(string(body)) {
 		return nil
 	}
-	if !utf8.ValidString(string(body)) {
+	var bj any
+	err = json.Unmarshal(body, &bj)
+	if err != nil {
+		return nil
+	}
+	body, err = json.MarshalIndent(bj, "", "  ")
+	if err != nil || len(body) > 1024*32 {
 		return nil
 	}
 	post := fmt.Sprintf("```json\n%s\n```", string(body))
