@@ -45,4 +45,27 @@ LimitNOFILE=65536
 WantedBy=multi-user.target
 ```
 
+## 🪝 Webhook Integration
+
+mnm provides a standard webhook integration that allows any service to send messages to your Mixin groups. If you've configured mnm in a group, click on the group to get a webhook URL like:
+
+```
+https://mnm.sh/in/eca0f41a-eca0-eca0-eca0-cd13f392eca0
+```
+
+Simply use this URL in any service that supports webhooks, and you'll receive standard JSON notifications in your group.
+
+For better readability, mnm supports jq syntax for content formatting. Add parameters to customize the message display:
+
+```
+https://mnm.sh/in/eca0f41a-eca0-eca0-eca0-cd13f392eca0?title=.data.issue.title&body=.data.body&link=.url
+```
+
+This extracts:
+- `.data.issue.title` as the message title
+- `.data.body` as the card content
+- `.url` as a clickable link
+
+With this flexible formatting, any third-party service can send customized messages to your Mixin groups with just a webhook URL.
+
 Endless possibilities, and yet convenient to go.
