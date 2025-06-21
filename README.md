@@ -45,8 +45,6 @@ LimitNOFILE=65536
 WantedBy=multi-user.target
 ```
 
-Endless possibilities, and yet convenient to go.
-
 ## 🪝 Webhook Integration
 
 mnm provides a standard webhook integration that allows any service to send messages to your Mixin groups. If you've configured mnm in a group, click on the group to get a webhook URL like:
@@ -69,3 +67,5 @@ This extracts:
 - `.url` as a clickable link
 
 With this flexible formatting, any third-party service can send customized messages to your Mixin groups with just a webhook URL.
+
+Endless possibilities, and yet convenient to go.
